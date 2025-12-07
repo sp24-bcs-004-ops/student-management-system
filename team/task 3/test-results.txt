@@ -1,0 +1,32 @@
+=== STUDENT RECORD SYSTEM TEST RESULTS ===
+
+1. Add Students (Normal Inputs)
+--------------------------------
+Added: S1 | Ali | 20
+Added: S2 | Sara | 21
+
+2. Add Duplicate Student (Incorrect Input)
+------------------------------------------
+Failed to add: S1 | Duplicate | 30 (Duplicate ID)
+
+3. Search Students
+------------------
+Search S1: Found -> S1 | Ali | 20
+Search S5: Not Found
+
+4. Delete Students
+------------------
+Delete S2: Success
+Delete S99: Not Found
+
+5. Undo Deleted Student
+------------------------
+Undo pop: S2 | Sara | 21
+Added back: S2 | Sara | 21
+
+6. Final Display of Students
+-----------------------------
+S1 | Ali | 20
+S2 | Sara | 21
+
+=== END OF TEST RESULTS ===
