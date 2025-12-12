@@ -1,0 +1,214 @@
+#ifndef DOUBLY_LINKED_LIST_H
+#define DOUBLY_LINKED_LIST_H
+
+// doubly_linked_list.h
+// Templated Doubly Linked List (Dev-C++ compatible: uses NULL, no C++11-only features)
+
+#include <iostream>
+#include <vector>
+#include <stdexcept>
+
+template<typename T>
+class DoublyLinkedList {
+private:
+    struct Node {
+        T data;
+        Node* prev;
+        Node* next;
+        Node(const T& d) : data(d), prev(NULL), next(NULL) {}
+    };
+    Node* head;
+    Node* tail;
+    size_t sz;
+
+    void unlink(Node* cur) {
+        if (!cur) return;
+        if (cur->prev) cur->prev->next = cur->next; else head = cur->next;
+        if (cur->next) cur->next->prev = cur->prev; else tail = cur->prev;
+        delete cur;
+        if (sz > 0) sz--;
+    }
+
+public:
+    DoublyLinkedList() : head(NULL), tail(NULL), sz(0) {}
+    ~DoublyLinkedList() { clear(); }
+
+    // disable copy to keep simple and avoid template linking issues
+    DoublyLinkedList(const DoublyLinkedList&) = delete;
+    DoublyLinkedList& operator=(const DoublyLinkedList&) = delete;
+
+    bool empty() const { return sz == 0; }
+    size_t size() const { return sz; }
+
+    void clear() {
+        Node* cur = head;
+        while (cur) {
+            Node* nxt = cur->next;
+            delete cur;
+            cur = nxt;
+        }
+        head = tail = NULL;
+        sz = 0;
+    }
+
+    // Insert operations
+    void push_back(const T& val) {
+        Node* node = new Node(val);
+        if (!head) { head = tail = node; }
+        else {
+            tail->next = node;
+            node->prev = tail;
+            tail = node;
+        }
+        sz++;
+    }
+
+    void push_front(const T& val) {
+        Node* node = new Node(val);
+        if (!head) { head = tail = node; }
+        else {
+            node->next = head;
+            head->prev = node;
+            head = node;
+        }
+        sz++;
+    }
+
+    void insert_at(size_t index, const T& val) {
+        if (index > sz) throw std::out_of_range("insert_at: index > size");
+        if (index == 0) { push_front(val); return; }
+        if (index == sz) { push_back(val); return; }
+        Node* cur = head;
+        for (size_t i = 0; i < index; ++i) cur = cur->next;
+        Node* node = new Node(val);
+        Node* prev = cur->prev;
+        node->next = cur;
+        node->prev = prev;
+        prev->next = node;
+        cur->prev = node;
+        sz++;
+    }
+
+    // Delete operations
+    void delete_at(size_t index) {
+        if (index >= sz) throw std::out_of_range("delete_at: index >= size");
+        Node* cur = head;
+        for (size_t i = 0; i < index; ++i) cur = cur->next;
+        unlink(cur);
+    }
+
+    bool delete_by_value(const T& value) {
+        Node* cur = head;
+        while (cur) {
+            if (cur->data == value) { unlink(cur); return true; }
+            cur = cur->next;
+        }
+        return false;
+    }
+
+    // Search
+    long search(const T& val) const {
+        Node* cur = head;
+        long idx = 0;
+        while (cur) {
+            if (cur->data == val) return idx;
+            cur = cur->next;
+            ++idx;
+        }
+        return -1;
+    }
+
+    // Update
+    void update_at(size_t index, const T& newValue) {
+        if (index >= sz) throw std::out_of_range("update_at: index >= size");
+        Node* cur = head;
+        for (size_t i = 0; i < index; ++i) cur = cur->next;
+        cur->data = newValue;
+    }
+
+    // Replace occurrences (first only if replaceAll==false)
+    size_t update_value(const T& oldValue, const T& newValue, bool replaceAll /*= false*/) {
+        Node* cur = head;
+        size_t count = 0;
+        while (cur) {
+            if (cur->data == oldValue) {
+                cur->data = newValue;
+                ++count;
+                if (!replaceAll) return count;
+            }
+            cur = cur->next;
+        }
+        return count;
+    }
+
+    // Traverse helpers
+    std::vector<T> to_vector_forward() const {
+        std::vector<T> out;
+        out.reserve(sz);
+        Node* cur = head;
+        size_t safety = 0;
+        while (cur) {
+            out.push_back(cur->data);
+            cur = cur->next;
+            safety++;
+            if (safety > sz + 5) throw std::runtime_error("to_vector_forward: potential infinite loop");
+        }
+        return out;
+    }
+
+    std::vector<T> to_vector_backward() const {
+        std::vector<T> out;
+        out.reserve(sz);
+        Node* cur = tail;
+        size_t safety = 0;
+        while (cur) {
+            out.push_back(cur->data);
+            cur = cur->prev;
+            safety++;
+            if (safety > sz + 5) throw std::runtime_error("to_vector_backward: potential infinite loop");
+        }
+        return out;
+    }
+
+    void print_forward() const {
+        Node* cur = head;
+        if (!cur) { std::cout << "(empty)\n"; return; }
+        while (cur) {
+            std::cout << cur->data;
+            if (cur->next) std::cout << " <-> ";
+            cur = cur->next;
+        }
+        std::cout << "\n";
+    }
+
+    void print_backward() const {
+        Node* cur = tail;
+        if (!cur) { std::cout << "(empty)\n"; return; }
+        while (cur) {
+            std::cout << cur->data;
+            if (cur->prev) std::cout << " <-> ";
+            cur = cur->prev;
+        }
+        std::cout << "\n";
+    }
+
+    // Stck helpers: pop_back (removes last node) and back (peek)
+    bool pop_back(T &out) {
+        if (!tail) return false;
+        out = tail->data;
+        Node* cur = tail;
+        if (cur->prev) { tail = cur->prev; tail->next = NULL; }
+        else { head = tail = NULL; }
+        delete cur;
+        if (sz > 0) sz--;
+        return true;
+    }
+
+    bool back(T &out) const {
+        if (!tail) return false;
+        out = tail->data;
+        return true;
+    }
+};
+
+#endif // DOUBLY_LINKED_LIST_H
