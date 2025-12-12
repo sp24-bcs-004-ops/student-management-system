@@ -1,0 +1,20 @@
+DoublyLinkedList<int>  (Task B) 
+
+After push_back 10,20,30: 10 <-> 20 <-> 30
+After insert_at(1,15): 10 <-> 15 <-> 20 <-> 30
+Search 20 -> index: 2
+After update_at(2,99): 10 <-> 15 <-> 99 <-> 30
+delete_by_value(15) -> deleted
+10 <-> 99 <-> 30
+After delete_at(0): 99 <-> 30
+Final vector forward: [99, 30]
+
+ Stack<int> Automated Demo 
+After push 1,2,3: Top -> 3 | 2 | 1
+Top: 3
+Popped: 3
+Popped: 2
+Popped: 1
+Pop on empty returned false (expected)
+
+ finished. Task B complete.
